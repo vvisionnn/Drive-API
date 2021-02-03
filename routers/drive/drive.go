@@ -37,13 +37,11 @@ func UrlHandler(ctx *gin.Context) {
 		ctx.String(http.StatusOK, Drive.GetOAuthURI())
 		return
 	}
-	//fmt.Println(Drive.GetOAuthURI(finalUrl))
 	ctx.String(http.StatusOK, Drive.GetOAuthURI(finalUrl))
 }
 
 func CallbackHandler(ctx *gin.Context) {
 	code := ctx.DefaultQuery("code", "")
-	fmt.Println("code: " + code)
 	if len(code) == 0 {
 		ctx.String(http.StatusOK, "code error")
 		return
@@ -81,7 +79,6 @@ func ListHandler(ctx *gin.Context) {
 
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/%s", settings.CONF.OnedriveEndpoint, suffix)
-	fmt.Println("url: ", url)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
 	resp, err := client.Do(req)
