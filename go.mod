@@ -1,4 +1,4 @@
-module Drive-API
+module github.com/vvisionnn/Drive-API
 
 go 1.15
 

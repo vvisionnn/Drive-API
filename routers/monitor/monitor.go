@@ -1,8 +1,8 @@
 package monitor
 
 import (
-	"Drive-API/pkgs/response"
 	"github.com/gin-gonic/gin"
+	"github.com/vvisionnn/Drive-API/pkgs/response"
 )
 
 func Ping(ctx *gin.Context) {

@@ -1,10 +1,10 @@
 package routers
 
 import (
-	"Drive-API/routers/drive"
 	"github.com/gin-gonic/gin"
+	"github.com/vvisionnn/Drive-API/routers/drive"
+	"github.com/vvisionnn/Drive-API/routers/monitor"
 )
-import "Drive-API/routers/monitor"
 
 func InitialRouter() *gin.Engine {
 	engine := gin.Default()

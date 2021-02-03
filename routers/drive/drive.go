@@ -1,12 +1,12 @@
 package drive
 
 import (
-	"Drive-API/pkgs/onedrive"
-	"Drive-API/pkgs/response"
-	"Drive-API/settings"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/vvisionnn/Drive-API/pkgs/onedrive"
+	"github.com/vvisionnn/Drive-API/pkgs/response"
+	"github.com/vvisionnn/Drive-API/settings"
 	"io/ioutil"
 	"net/http"
 )

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Drive-API/routers"
-	"Drive-API/settings"
 	"fmt"
+	"github.com/vvisionnn/Drive-API/routers"
+	"github.com/vvisionnn/Drive-API/settings"
 	"log"
 )
 
