@@ -2,6 +2,7 @@ package drive
 
 import (
 	"Drive-API/pkgs/onedrive"
+	"Drive-API/pkgs/response"
 	"Drive-API/settings"
 	"encoding/json"
 	"fmt"
@@ -26,39 +27,38 @@ func StatusHandler(ctx *gin.Context) {
 		status = "login first"
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"status": status,
-	})
+	response.SuccessWithMessage(ctx, status)
 }
 
 func UrlHandler(ctx *gin.Context) {
+	var oauthUrl = ""
 	finalUrl := ctx.DefaultQuery("path", "")
 	if len(finalUrl) == 0 {
-		ctx.String(http.StatusOK, Drive.GetOAuthURI())
-		return
+		oauthUrl = Drive.GetOAuthURI()
+	} else {
+		oauthUrl = Drive.GetOAuthURI(finalUrl)
 	}
-	ctx.String(http.StatusOK, Drive.GetOAuthURI(finalUrl))
+	response.SuccessWithData(ctx, oauthUrl)
 }
 
 func CallbackHandler(ctx *gin.Context) {
 	code := ctx.DefaultQuery("code", "")
+	finalUrl := ctx.DefaultQuery("state", "")
+
 	if len(code) == 0 {
-		ctx.String(http.StatusOK, "code error")
+		response.InternalServerError(ctx, "get code error")
 		return
 	}
 	if err := Drive.UpdateCredential(code); err != nil {
-		ctx.String(http.StatusOK, err.Error())
+		response.InternalServerError(ctx, err.Error())
 		return
 	}
-	finalUrl := ctx.DefaultQuery("state", "")
-	ctx.Redirect(http.StatusTemporaryRedirect, finalUrl)
+	response.RedirectTemporary(ctx, finalUrl)
 }
 
 func ListHandler(ctx *gin.Context) {
 	if !Drive.LoginStatus() {
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": "login first",
-		})
+		response.SuccessWithMessage(ctx, "login first")
 		return
 	}
 
@@ -71,22 +71,20 @@ func ListHandler(ctx *gin.Context) {
 
 	accessToken, err := Drive.GetAccessToken()
 	if err != nil {
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": "get access token error",
-		})
+		response.SuccessWithMessage(ctx, "get access token error")
 		return
 	}
 
-	client := &http.Client{}
 	url := fmt.Sprintf("%s/%s", settings.CONF.OnedriveEndpoint, suffix)
+
+	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("err:", err)
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": "request error",
-		})
+		response.SuccessWithMessage(ctx, "request graph api error")
 		return
 	}
 	defer resp.Body.Close()
@@ -94,7 +92,8 @@ func ListHandler(ctx *gin.Context) {
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	items := onedrive.ListResponse{}
 	if err := json.Unmarshal(respBody, &items); err != nil {
+		// todo: add log
 		fmt.Println("list error: ", err)
 	}
-	ctx.JSON(http.StatusOK, items)
+	response.SuccessWithData(ctx, items)
 }
