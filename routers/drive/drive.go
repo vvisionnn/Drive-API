@@ -87,44 +87,47 @@ func CallbackHandler(ctx *gin.Context) {
 	response.RedirectTemporary(ctx, finalUrl)
 }
 
-func ListHandler(ctx *gin.Context) {
-	if !Drive.LoginStatus() {
-		response.SuccessWithMessage(ctx, "login first")
-		return
-	}
-
-	var suffix string
-	if itemId := ctx.DefaultQuery("id", ""); len(itemId) == 0 {
-		suffix = "drive/root/children"
-	} else {
-		suffix = fmt.Sprintf("drive/items/%s/children", itemId)
-	}
-
-	accessToken, err := Drive.GetAccessToken()
-	if err != nil {
-		response.SuccessWithMessage(ctx, "get access token error")
-		return
-	}
-
+func ListRootHandler(ctx *gin.Context) {
+	suffix := "drive/root/children"
 	url := fmt.Sprintf("%s/%s", settings.CONF.OnedriveEndpoint, suffix)
+	items, err := listChildren(url)
+	if err != nil {
+		log.Println(err)
+		response.SuccessWithMessage(ctx, "list children error")
+		return
+	}
+	response.SuccessWithData(ctx, *items)
+}
+
+func ListHandler(ctx *gin.Context) {
+	suffix := fmt.Sprintf("drive/items/%s/children", ctx.Param("id"))
+	url := fmt.Sprintf("%s/%s", settings.CONF.OnedriveEndpoint, suffix)
+	items, err := listChildren(url)
+	if err != nil {
+		log.Println(err)
+		response.SuccessWithMessage(ctx, "list children error")
+		return
+	}
+	response.SuccessWithData(ctx, *items)
+}
+
+
+func listChildren(url string) (*onedrive.ListResponse, error) {
+	accessToken, err := Drive.GetAccessToken()
+	if err != nil { return nil, err }
 
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
 
 	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println("err:", err)
-		response.SuccessWithMessage(ctx, "request graph api error")
-		return
-	}
+	if err != nil { return nil, err }
 	defer resp.Body.Close()
 
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	items := onedrive.ListResponse{}
 	if err := json.Unmarshal(respBody, &items); err != nil {
-		// todo: add log
-		fmt.Println("list error: ", err)
+		return nil, err
 	}
-	response.SuccessWithData(ctx, items)
+	return &items, nil
 }

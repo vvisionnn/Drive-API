@@ -29,7 +29,11 @@ func InitialRouter() (*gin.Engine, error) {
 			auth.GET("/callback", drive.CallbackHandler)
 		}
 
-		api.GET("/drive", cache.CachePage(store, time.Second * 5, drive.ListHandler))
+		driveApi := api.Group("drive")
+		{
+			driveApi.GET("", cache.CachePage(store, time.Second * 30, drive.ListRootHandler))
+			driveApi.GET("/:id", cache.CachePage(store, time.Second * 30, drive.ListHandler))
+		}
 	}
 
 	return engine, nil
