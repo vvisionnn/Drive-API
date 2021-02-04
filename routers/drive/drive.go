@@ -8,16 +8,47 @@ import (
 	"github.com/vvisionnn/Drive-API/pkgs/response"
 	"github.com/vvisionnn/Drive-API/settings"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 )
 
-var Drive = onedrive.NewClient(
-	settings.CONF.AppId,
-	settings.CONF.AppSecret,
-	settings.CONF.OauthEndpoint,
-	settings.CONF.Redirect,
-	settings.CONF.Scopes,
-)
+var Drive *onedrive.Client
+
+func InitialDrive() error {
+	Drive = onedrive.NewClient(
+		settings.CONF.AppId,
+		settings.CONF.AppSecret,
+		settings.CONF.OauthEndpoint,
+		settings.CONF.Redirect,
+		settings.CONF.Scopes,
+	)
+
+	// check if the token exist
+	if _, err := os.Stat(".tokens.json"); os.IsNotExist(err) {
+		log.Println("tokens not found, creating file...")
+		// isn't exist, just create file, update after login
+		_, err := os.OpenFile(".tokens.json", os.O_CREATE|os.O_RDWR, 0766)
+		if err != nil {
+			return err
+		}
+	} else {
+		log.Println("found previous tokens file, update drive status from file...")
+		// exist, initial token from file
+		content, err := ioutil.ReadFile(".tokens.json")
+		if err != nil {
+			return err
+		}
+		ts := onedrive.Tokens{}
+		if err := json.Unmarshal(content, &ts); err != nil {
+			return err
+		}
+		Drive.AccessToken = ts.AccessToken
+		Drive.RefreshToken = ts.RefreshToken
+		log.Println("update from file done.")
+	}
+	return nil
+}
 
 func StatusHandler(ctx *gin.Context) {
 	var status string

@@ -8,7 +8,10 @@ import (
 )
 
 func main() {
-	engine := routers.InitialRouter()
+	engine, err := routers.InitialRouter()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	port := settings.CONF.Port
 	if err := engine.Run(fmt.Sprintf(":%d", port)); err != nil {

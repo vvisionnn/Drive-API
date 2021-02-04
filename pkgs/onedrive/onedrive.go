@@ -47,9 +47,14 @@ func NewClient(clientID, clientSecret, endpoint, redirectURI string, scopes []st
 	}
 }
 
+type Tokens struct {
+	AccessToken string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 // LoginStatus return if onedrive instance logged in
 func (drive *Client) LoginStatus() bool {
-	return len(drive.AccessToken) > 0 && len(drive.RefreshToken) > 0
+	return len(drive.RefreshToken) > 0
 }
 
 // GetAccessToken return the onedrive access token, refresh if needed
@@ -111,6 +116,16 @@ func (drive *Client) UpdateCredential(code ...string) error {
 	if err := json.Unmarshal(respBody, &_resp); err != nil {
 		return err
 	}
+
+	// update .tokens.json file
+	ts := Tokens{
+		AccessToken:  _resp.AccessToken,
+		RefreshToken: _resp.RefreshToken,
+	}
+	tsStr, err := json.Marshal(ts)
+	if err != nil { return err }
+	err = ioutil.WriteFile(".tokens.json", tsStr, 0644)
+	if err != nil { return err }
 
 	drive.AccessToken = _resp.AccessToken
 	drive.RefreshToken = _resp.RefreshToken

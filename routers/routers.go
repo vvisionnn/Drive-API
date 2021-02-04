@@ -10,9 +10,12 @@ import (
 	"github.com/gin-contrib/cache/persistence"
 )
 
-func InitialRouter() *gin.Engine {
+func InitialRouter() (*gin.Engine, error) {
 	engine := gin.Default()
 	store := persistence.NewInMemoryStore(time.Second)
+	if err := drive.InitialDrive(); err != nil {
+		return nil, err
+	}
 
 	api := engine.Group("api")
 	{
@@ -29,5 +32,5 @@ func InitialRouter() *gin.Engine {
 		api.GET("/drive", cache.CachePage(store, time.Second * 5, drive.ListHandler))
 	}
 
-	return engine
+	return engine, nil
 }
