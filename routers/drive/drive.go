@@ -45,6 +45,7 @@ func InitialDrive() error {
 		}
 		Drive.AccessToken = ts.AccessToken
 		Drive.RefreshToken = ts.RefreshToken
+		Drive.AccessTokenExpireTime = ts.AccessTokenExpireTime
 		log.Println("update from file done.")
 	}
 	return nil

@@ -49,6 +49,7 @@ func NewClient(clientID, clientSecret, endpoint, redirectURI string, scopes []st
 
 type Tokens struct {
 	AccessToken string `json:"access_token"`
+	AccessTokenExpireTime time.Time `json:"access_token_expire_time"`
 	RefreshToken string `json:"refresh_token"`
 }
 
@@ -120,6 +121,7 @@ func (drive *Client) UpdateCredential(code ...string) error {
 	// update .tokens.json file
 	ts := Tokens{
 		AccessToken:  _resp.AccessToken,
+		AccessTokenExpireTime: time.Now().Add(time.Duration(_resp.ExpiresIn) * time.Second),
 		RefreshToken: _resp.RefreshToken,
 	}
 	tsStr, err := json.Marshal(ts)
