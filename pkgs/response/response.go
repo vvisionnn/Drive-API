@@ -39,8 +39,6 @@ func SuccessWithMessageAndData(ctx *gin.Context, msg string, data interface{}) {
 	})
 }
 
-
 func RedirectTemporary(ctx *gin.Context, url string) {
 	ctx.Redirect(http.StatusTemporaryRedirect, url)
 }
-

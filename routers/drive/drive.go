@@ -112,17 +112,20 @@ func ListHandler(ctx *gin.Context) {
 	response.SuccessWithData(ctx, *items)
 }
 
-
 func listChildren(url string) (*onedrive.ListResponse, error) {
 	accessToken, err := Drive.GetAccessToken()
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
 
 	resp, err := client.Do(req)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	respBody, _ := ioutil.ReadAll(resp.Body)

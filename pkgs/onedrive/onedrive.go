@@ -48,9 +48,9 @@ func NewClient(clientID, clientSecret, endpoint, redirectURI string, scopes []st
 }
 
 type Tokens struct {
-	AccessToken string `json:"access_token"`
+	AccessToken           string    `json:"access_token"`
 	AccessTokenExpireTime time.Time `json:"access_token_expire_time"`
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken          string    `json:"refresh_token"`
 }
 
 // LoginStatus return if onedrive instance logged in
@@ -60,7 +60,7 @@ func (drive *Client) LoginStatus() bool {
 
 // GetAccessToken return the onedrive access token, refresh if needed
 func (drive *Client) GetAccessToken() (string, error) {
-	if drive.AccessTokenExpireTime.After(time.Now()) {
+	if drive.AccessTokenExpireTime.Before(time.Now()) {
 		// update access token by refresh token
 		if err := drive.UpdateCredential(); err != nil {
 			return "", err
@@ -120,14 +120,18 @@ func (drive *Client) UpdateCredential(code ...string) error {
 
 	// update .tokens.json file
 	ts := Tokens{
-		AccessToken:  _resp.AccessToken,
+		AccessToken:           _resp.AccessToken,
 		AccessTokenExpireTime: time.Now().Add(time.Duration(_resp.ExpiresIn) * time.Second),
-		RefreshToken: _resp.RefreshToken,
+		RefreshToken:          _resp.RefreshToken,
 	}
 	tsStr, err := json.Marshal(ts)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	err = ioutil.WriteFile(".tokens.json", tsStr, 0644)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	drive.AccessToken = _resp.AccessToken
 	drive.RefreshToken = _resp.RefreshToken
