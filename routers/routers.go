@@ -31,8 +31,8 @@ func InitialRouter() (*gin.Engine, error) {
 
 		driveApi := api.Group("drive")
 		{
-			driveApi.GET("", cache.CachePage(store, time.Second*30, drive.ListRootHandler))
-			driveApi.GET("/:id", cache.CachePage(store, time.Second*30, drive.ListHandler))
+			driveApi.GET("", cache.CachePage(store, time.Second*5, drive.ListRootHandler))
+			driveApi.GET("/:id", cache.CachePage(store, time.Second*10, drive.ListHandler))
 		}
 	}
 
