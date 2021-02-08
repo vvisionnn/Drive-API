@@ -1,0 +1,12 @@
+{
+  "port": 8421,
+  "app_id": "<replace with your own client_id>",
+  "app_secret": "<replace with your own client_secret>",
+  "redirect": "http://<replace with your own site url>/api/auth/callback",
+  "scopes": [
+    "Files.Read.All"
+  ],
+  "oauth_endpoint": "https://login.microsoftonline.com/common/oauth2/v2.0",
+  "authority": "https://login.microsoftonline.com/common",
+  "onedrive_endpoint": "https://graph.microsoft.com/v1.0/me"
+}
