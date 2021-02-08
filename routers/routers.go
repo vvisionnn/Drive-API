@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/vvisionnn/Drive-API/middleware"
 	"github.com/vvisionnn/Drive-API/routers/drive"
 	"github.com/vvisionnn/Drive-API/routers/monitor"
 	"time"
@@ -16,6 +17,8 @@ func InitialRouter() (*gin.Engine, error) {
 	if err := drive.InitialDrive(); err != nil {
 		return nil, err
 	}
+
+	engine.Use(middleware.FrontendHandler())
 
 	api := engine.Group("api")
 	{

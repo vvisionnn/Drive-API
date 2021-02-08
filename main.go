@@ -1,3 +1,5 @@
+//go:generate statik -src=frontend/build
+//go:generate go fmt statik/statik.go
 package main
 
 import (
