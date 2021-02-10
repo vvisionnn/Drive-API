@@ -14,3 +14,9 @@ func Ping(ctx *gin.Context) {
 func CachePing(ctx *gin.Context) {
 	response.SuccessWithMessage(ctx, fmt.Sprintf("pong: %d", time.Now().Unix()))
 }
+
+// api for test
+func CacheHandler(ctx *gin.Context) {
+	// recursive get folder
+	response.Success(ctx)
+}

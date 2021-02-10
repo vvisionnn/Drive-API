@@ -2,14 +2,12 @@ package drive
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/vvisionnn/Drive-API/pkgs/onedrive"
 	"github.com/vvisionnn/Drive-API/pkgs/response"
 	"github.com/vvisionnn/Drive-API/settings"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 )
 
@@ -89,9 +87,7 @@ func CallbackHandler(ctx *gin.Context) {
 }
 
 func ListRootHandler(ctx *gin.Context) {
-	suffix := "drive/root/children"
-	url := fmt.Sprintf("%s/%s", settings.CONF.OnedriveEndpoint, suffix)
-	items, err := listChildren(url)
+	items, err := Drive.ListRootChildren()
 	if err != nil {
 		log.Println(err)
 		response.SuccessWithMessage(ctx, "list children error")
@@ -101,36 +97,11 @@ func ListRootHandler(ctx *gin.Context) {
 }
 
 func ListHandler(ctx *gin.Context) {
-	suffix := fmt.Sprintf("drive/items/%s/children", ctx.Param("id"))
-	url := fmt.Sprintf("%s/%s", settings.CONF.OnedriveEndpoint, suffix)
-	items, err := listChildren(url)
+	items, err := Drive.ListItemChildren(ctx.Param("id"))
 	if err != nil {
 		log.Println(err)
 		response.SuccessWithMessage(ctx, "list children error")
 		return
 	}
 	response.SuccessWithData(ctx, *items)
-}
-
-func listChildren(url string) (*onedrive.ListResponse, error) {
-	accessToken, err := Drive.GetAccessToken()
-	if err != nil {
-		return nil, err
-	}
-
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
-
-	resp, err := Drive.HttpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	respBody, _ := ioutil.ReadAll(resp.Body)
-	items := onedrive.ListResponse{}
-	if err := json.Unmarshal(respBody, &items); err != nil {
-		return nil, err
-	}
-	return &items, nil
 }

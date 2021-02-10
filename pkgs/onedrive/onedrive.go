@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/vvisionnn/Drive-API/settings"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -147,4 +148,39 @@ func (drive *Client) GetOAuthURI(state ...string) string {
 		return drive.OauthURI
 	}
 	return fmt.Sprintf("%s&state=%s", drive.OauthURI, state[0])
+}
+
+func (drive *Client) ListRootChildren() (*ListResponse, error) {
+	suffix := "drive/root/children"
+	url := fmt.Sprintf("%s/%s", settings.CONF.OnedriveEndpoint, suffix)
+	return drive.ListChildren(url)
+}
+
+func (drive *Client) ListItemChildren(itemId string) (*ListResponse, error) {
+	suffix := fmt.Sprintf("drive/items/%s/children", itemId)
+	_url := fmt.Sprintf("%s/%s", settings.CONF.OnedriveEndpoint, suffix)
+	return drive.ListChildren(_url)
+}
+
+func (drive *Client) ListChildren(url string) (*ListResponse, error) {
+	accessToken, err := drive.GetAccessToken()
+	if err != nil {
+		return nil, err
+	}
+
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+
+	resp, err := drive.HttpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := ioutil.ReadAll(resp.Body)
+	items := ListResponse{}
+	if err := json.Unmarshal(respBody, &items); err != nil {
+		return nil, err
+	}
+	return &items, nil
 }

@@ -37,6 +37,11 @@ func InitialRouter() (*gin.Engine, error) {
 			driveApi.GET("", cache.CachePage(store, time.Second*5, drive.ListRootHandler))
 			driveApi.GET("/:id", cache.CachePage(store, time.Second*10, drive.ListHandler))
 		}
+
+		betaApi := api.Group("beta")
+		{
+			betaApi.GET("/cache", monitor.CacheHandler)
+		}
 	}
 
 	return engine, nil
