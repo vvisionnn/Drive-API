@@ -21,6 +21,8 @@ type Client struct {
 	RefreshToken          string
 	OauthURI              string
 	Scopes                []string
+
+	HttpClient				http.Client
 }
 
 // NewClient create a new onedrive instance
@@ -44,6 +46,7 @@ func NewClient(clientID, clientSecret, endpoint, redirectURI string, scopes []st
 			clientID,
 			redirectURI,
 			strings.Join(scopes, " ")),
+		HttpClient: http.Client{Timeout: time.Second * 10},
 	}
 }
 
@@ -94,7 +97,6 @@ func (drive *Client) UpdateCredential(code ...string) error {
 	}
 
 	// build request
-	c := &http.Client{}
 	req, err := http.NewRequest(
 		"POST",
 		tokenURI,
@@ -109,7 +111,7 @@ func (drive *Client) UpdateCredential(code ...string) error {
 		req.Header.Add(key, val)
 	}
 
-	resp, _ := c.Do(req)
+	resp, _ := drive.HttpClient.Do(req)
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 

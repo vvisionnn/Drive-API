@@ -118,11 +118,10 @@ func listChildren(url string) (*onedrive.ListResponse, error) {
 		return nil, err
 	}
 
-	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken))
 
-	resp, err := client.Do(req)
+	resp, err := Drive.HttpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
