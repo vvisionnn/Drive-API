@@ -6,6 +6,7 @@ import (
 	"github.com/vvisionnn/Drive-API/pkgs/onedrive"
 	"github.com/vvisionnn/Drive-API/pkgs/response"
 	"github.com/vvisionnn/Drive-API/routers/drive"
+	"sync"
 	"time"
 )
 
@@ -28,15 +29,20 @@ func CacheHandler(ctx *gin.Context) {
 		return
 	}
 	var result []*Node
+	wg := sync.WaitGroup{}
 	for _, item := range items.Value {
-		node := &Node{
-			item,
-			[]*Node{},
-		}
-		node.BFSGetChildren()
-		result = append(result, node)
+		wg.Add(1)
+		go func(i onedrive.ItemInfo) {
+			node := &Node{
+				i,
+				[]*Node{},
+			}
+			node.BFSGetChildren(2)
+			result = append(result, node)
+			wg.Done()
+		}(item)
 	}
-	fmt.Println(result)
+	wg.Wait()
 	response.Success(ctx)
 }
 
@@ -45,8 +51,8 @@ type Node struct {
 	children []*Node
 }
 
-func (node *Node) BFSGetChildren() {
-	fmt.Println("id: ", node.ID, "name: ", node.Name)
+func (node *Node) BFSGetChildren(depth int) {
+	fmt.Println("depth: ", depth, "id: ", node.ID, "name: ", node.Name)
 	items, err := drive.Drive.ListItemChildren(node.ID)
 	if err != nil {
 		fmt.Println(err)
@@ -59,8 +65,15 @@ func (node *Node) BFSGetChildren() {
 			[]*Node{},
 		})
 	}
+	if depth--; depth == 0 || len(node.children) == 0 { return }
 
+	wg := sync.WaitGroup{}
 	for _, child := range node.children {
-		child.BFSGetChildren()
+		wg.Add(1)
+		go func(c *Node) {
+			c.BFSGetChildren(depth)
+			wg.Done()
+		}(child)
 	}
+	wg.Wait()
 }

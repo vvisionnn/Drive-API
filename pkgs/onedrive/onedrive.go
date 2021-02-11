@@ -178,6 +178,7 @@ func (drive *Client) ListChildren(url string) (*ListResponse, error) {
 	defer resp.Body.Close()
 
 	respBody, _ := ioutil.ReadAll(resp.Body)
+	//fmt.Println(string(respBody))
 	items := ListResponse{}
 	if err := json.Unmarshal(respBody, &items); err != nil {
 		return nil, err
