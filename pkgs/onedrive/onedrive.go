@@ -59,7 +59,7 @@ type Tokens struct {
 
 // LoginStatus return if onedrive instance logged in
 func (drive *Client) LoginStatus() bool {
-	return len(drive.RefreshToken) > 0
+	return drive != nil && len(drive.RefreshToken) > 0
 }
 
 // GetAccessToken return the onedrive access token, refresh if needed
@@ -152,8 +152,8 @@ func (drive *Client) GetOAuthURI(state ...string) string {
 
 func (drive *Client) ListRootChildren() (*ListResponse, error) {
 	suffix := "drive/root/children"
-	url := fmt.Sprintf("%s/%s", settings.CONF.OnedriveEndpoint, suffix)
-	return drive.ListChildren(url)
+	_url := fmt.Sprintf("%s/%s", settings.CONF.OnedriveEndpoint, suffix)
+	return drive.ListChildren(_url)
 }
 
 func (drive *Client) ListItemChildren(itemId string) (*ListResponse, error) {

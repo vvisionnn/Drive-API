@@ -3,9 +3,7 @@
 package main
 
 import (
-	"fmt"
 	"github.com/vvisionnn/Drive-API/routers"
-	"github.com/vvisionnn/Drive-API/settings"
 	"log"
 )
 
@@ -15,8 +13,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	port := settings.CONF.Port
-	if err := engine.Run(fmt.Sprintf(":%d", port)); err != nil {
+	if err := engine.Run(":8421"); err != nil {
 		log.Fatal("run server error: ", err)
 	}
 }

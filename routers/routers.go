@@ -27,8 +27,9 @@ func InitialRouter() (*gin.Engine, error) {
 
 		auth := api.Group("auth")
 		{
+			auth.PUT("/conf", drive.SetConfiguration)
 			auth.GET("/stat", drive.StatusHandler)
-			auth.GET("/url", drive.UrlHandler)
+			//auth.GET("/url", drive.UrlHandler)
 			auth.GET("/callback", drive.CallbackHandler)
 		}
 

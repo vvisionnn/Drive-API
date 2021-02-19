@@ -13,12 +13,52 @@ import (
 
 var Drive *onedrive.Client
 
-func InitialDrive() error {
+func SetConfiguration(ctx *gin.Context) {
+	var err error
+	// todo: check if curr and previous conf are same one
+	data := struct {
+		ClientId     string `json:"client_id"`
+		ClientSecret string `json:"client_secret"`
+		RedirectUrl  string `json:"redirect_url"`
+		Path         string `json:"path"`
+	}{}
+	if err = ctx.ShouldBindJSON(&data); err != nil {
+		log.Println(err)
+		response.SuccessWithMessage(ctx, "params error")
+		return
+	}
+	settings.CONF = &settings.Configuration{
+		ClientId:         data.ClientId,
+		ClientSecret:     data.ClientSecret,
+		RedirectUrl:      data.RedirectUrl,
+		Scopes:           []string{"Files.Read.All"},
+		OauthEndpoint:    "https://login.microsoftonline.com/common/oauth2/v2.0",
+		Authority:        "https://login.microsoftonline.com/common",
+		OnedriveEndpoint: "https://graph.microsoft.com/v1.0/me",
+	}
+	// todo:save conf file
+
 	Drive = onedrive.NewClient(
-		settings.CONF.AppId,
-		settings.CONF.AppSecret,
+		settings.CONF.ClientId,
+		settings.CONF.ClientSecret,
 		settings.CONF.OauthEndpoint,
-		settings.CONF.Redirect,
+		settings.CONF.RedirectUrl,
+		settings.CONF.Scopes,
+	)
+	// get oauth url and return
+	response.SuccessWithData(ctx, Drive.GetOAuthURI(data.Path))
+}
+
+func InitialDrive() error {
+	// if conf doesn't exist, just return and wait
+	if settings.CONF == nil { return nil }
+
+	// if previous config found, initial drive
+	Drive = onedrive.NewClient(
+		settings.CONF.ClientId,
+		settings.CONF.ClientSecret,
+		settings.CONF.OauthEndpoint,
+		settings.CONF.RedirectUrl,
 		settings.CONF.Scopes,
 	)
 
@@ -51,7 +91,9 @@ func InitialDrive() error {
 
 func StatusHandler(ctx *gin.Context) {
 	var status string
-	if Drive.LoginStatus() {
+	confStat := settings.CONF != nil
+	driveStat := Drive != nil && Drive.LoginStatus()
+	if confStat && driveStat {
 		status = "ok"
 	} else {
 		status = "login first"
@@ -60,16 +102,16 @@ func StatusHandler(ctx *gin.Context) {
 	response.SuccessWithMessage(ctx, status)
 }
 
-func UrlHandler(ctx *gin.Context) {
-	var oauthUrl = ""
-	finalUrl := ctx.DefaultQuery("path", "")
-	if len(finalUrl) == 0 {
-		oauthUrl = Drive.GetOAuthURI()
-	} else {
-		oauthUrl = Drive.GetOAuthURI(finalUrl)
-	}
-	response.SuccessWithData(ctx, oauthUrl)
-}
+//func UrlHandler(ctx *gin.Context) {
+//	var oauthUrl = ""
+//	finalUrl := ctx.DefaultQuery("path", "")
+//	if len(finalUrl) == 0 {
+//		oauthUrl = Drive.GetOAuthURI()
+//	} else {
+//		oauthUrl = Drive.GetOAuthURI(finalUrl)
+//	}
+//	response.SuccessWithData(ctx, oauthUrl)
+//}
 
 func CallbackHandler(ctx *gin.Context) {
 	code := ctx.DefaultQuery("code", "")
