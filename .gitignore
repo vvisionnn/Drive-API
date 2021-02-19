@@ -1,6 +1,7 @@
 .DS_Store
 .idea
 conf.json
+configuration.json
 .tokens.json
 
 statik
