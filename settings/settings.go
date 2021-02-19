@@ -30,3 +30,13 @@ func init() {
 		panic("configuration file error")
 	}
 }
+
+func (conf *Configuration) Save() {
+	confStr, err := json.Marshal(conf)
+	if err != nil {
+		log.Println("marshal config file error: ", err)
+	}
+	if err := ioutil.WriteFile("configuration.json", confStr, 0644); err != nil {
+		log.Println("save config file error: ", err)
+	}
+}

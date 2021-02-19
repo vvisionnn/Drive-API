@@ -36,7 +36,7 @@ func SetConfiguration(ctx *gin.Context) {
 		Authority:        "https://login.microsoftonline.com/common",
 		OnedriveEndpoint: "https://graph.microsoft.com/v1.0/me",
 	}
-	// todo:save conf file
+	settings.CONF.Save()
 
 	Drive = onedrive.NewClient(
 		settings.CONF.ClientId,
