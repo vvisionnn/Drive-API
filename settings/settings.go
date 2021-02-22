@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
 type Configuration struct {
@@ -17,9 +18,15 @@ type Configuration struct {
 }
 
 var CONF *Configuration
+var confFolder = "./data"
+var confPath = confFolder + "/configuration.json"
 
 func init() {
-	confPath := "./configuration.json"
+	if _, err := os.Stat(confFolder); os.IsNotExist(err) {
+		if err = os.Mkdir(confFolder, 0755); err != nil {
+			log.Panic("create config folder error: ", err)
+		}
+	}
 	confContent, err := ioutil.ReadFile(confPath)
 	if err != nil {
 		//log.Panic("Configuration file error")
@@ -36,7 +43,7 @@ func (conf *Configuration) Save() {
 	if err != nil {
 		log.Println("marshal config file error: ", err)
 	}
-	if err := ioutil.WriteFile("configuration.json", confStr, 0644); err != nil {
+	if err := ioutil.WriteFile(confPath, confStr, 0644); err != nil {
 		log.Println("save config file error: ", err)
 	}
 }

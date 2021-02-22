@@ -43,5 +43,6 @@ RUN apk upgrade \
     && rm -rf /var/cache/apk/*
 
 EXPOSE 8421/tcp
+VOLUME /data
 
 ENTRYPOINT ["Drive"]
