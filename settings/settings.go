@@ -33,6 +33,7 @@ func init() {
 		log.Println("no configuration file found")
 		return
 	}
+	log.Println("found previous file, initial settings.")
 	if err := json.Unmarshal(confContent, &CONF); err != nil {
 		panic("configuration file error")
 	}

@@ -52,6 +52,7 @@ func SetConfiguration(ctx *gin.Context) {
 func InitialDrive() error {
 	// if conf doesn't exist, just return and wait
 	if settings.CONF == nil { return nil }
+	log.Println("initial drive from previous settings")
 
 	// if previous config found, initial drive
 	Drive = onedrive.NewClient(
