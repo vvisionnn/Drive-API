@@ -131,7 +131,7 @@ func (drive *Client) UpdateCredential(code ...string) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(".tokens.json", tsStr, 0644)
+	err = ioutil.WriteFile("./data/tokens.json", tsStr, 0644)
 	if err != nil {
 		return err
 	}

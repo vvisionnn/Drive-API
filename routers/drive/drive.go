@@ -64,29 +64,38 @@ func InitialDrive() error {
 	)
 
 	// check if the token exist
-	if _, err := os.Stat(".tokens.json"); os.IsNotExist(err) {
+	if _, err := os.Stat("./data/tokens.json"); os.IsNotExist(err) {	// tokens.json doesn't exist
 		log.Println("tokens not found, creating file...")
 		// isn't exist, just create file, update after login
-		_, err := os.OpenFile(".tokens.json", os.O_CREATE|os.O_RDWR, 0766)
-		if err != nil {
-			return err
-		}
-	} else {
-		log.Println("found previous tokens file, update drive status from file...")
-		// exist, initial token from file
-		content, err := ioutil.ReadFile(".tokens.json")
-		if err != nil {
-			return err
-		}
-		ts := onedrive.Tokens{}
-		if err := json.Unmarshal(content, &ts); err != nil {
-			return err
-		}
-		Drive.AccessToken = ts.AccessToken
-		Drive.RefreshToken = ts.RefreshToken
-		Drive.AccessTokenExpireTime = ts.AccessTokenExpireTime
-		log.Println("update from file done.")
+		_, err = os.Create("./data/tokens.json")
+		return err
 	}
+
+	// tokens.json exist
+	log.Println("found previous tokens file, update drive status from file...")
+	// exist, initial token from file
+	content, err := ioutil.ReadFile("./data/tokens.json")
+	if err != nil {
+		return err
+	}
+
+	// exist but empty
+	// need authorize to get tokens
+	if len(content) == 0 {
+		log.Println("found previous tokens file, but it's empty.")
+		return nil
+	}
+
+	// tokens.json exists and is not empty
+	// update drive
+	ts := onedrive.Tokens{}
+	if err := json.Unmarshal(content, &ts); err != nil {
+		return err
+	}
+	Drive.AccessToken = ts.AccessToken
+	Drive.RefreshToken = ts.RefreshToken
+	Drive.AccessTokenExpireTime = ts.AccessTokenExpireTime
+	log.Println("update from file done.")
 	return nil
 }
 
