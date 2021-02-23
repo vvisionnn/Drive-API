@@ -51,7 +51,9 @@ func SetConfiguration(ctx *gin.Context) {
 
 func InitialDrive() error {
 	// if conf doesn't exist, just return and wait
-	if settings.CONF == nil { return nil }
+	if settings.CONF == nil {
+		return nil
+	}
 	log.Println("initial drive from previous settings")
 
 	// if previous config found, initial drive
@@ -64,7 +66,7 @@ func InitialDrive() error {
 	)
 
 	// check if the token exist
-	if _, err := os.Stat("./data/tokens.json"); os.IsNotExist(err) {	// tokens.json doesn't exist
+	if _, err := os.Stat("./data/tokens.json"); os.IsNotExist(err) { // tokens.json doesn't exist
 		log.Println("tokens not found, creating file...")
 		// isn't exist, just create file, update after login
 		_, err = os.Create("./data/tokens.json")

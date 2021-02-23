@@ -65,7 +65,9 @@ func (node *Node) BFSGetChildren(depth int) {
 			[]*Node{},
 		})
 	}
-	if depth--; depth == 0 || len(node.children) == 0 { return }
+	if depth--; depth == 0 || len(node.children) == 0 {
+		return
+	}
 
 	wg := sync.WaitGroup{}
 	for _, child := range node.children {

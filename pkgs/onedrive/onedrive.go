@@ -23,7 +23,7 @@ type Client struct {
 	OauthURI              string
 	Scopes                []string
 
-	HttpClient				http.Client
+	HttpClient http.Client
 }
 
 // NewClient create a new onedrive instance
